@@ -9,7 +9,7 @@ function App() {
     if (!canvasRef.current) return;
 
     // Initialize Three.js scene and get cleanup function
-    const cleanup = initThreeScene(canvasRef.current);
+    const cleanup = initThreeScene(canvasRef.current, "low");
 
     // Return cleanup function
     return cleanup;

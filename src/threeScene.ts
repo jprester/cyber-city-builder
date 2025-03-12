@@ -21,14 +21,16 @@ export const initThreeScene = (
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x111111);
 
-  // Setup camera
+  // Setup camera based on human scale (eye level is ~1.6-1.8m)
   const camera = new THREE.PerspectiveCamera(
-    75,
+    65,  // Slightly wider FoV for urban environment (human eye is ~60-70°)
     window.innerWidth / window.innerHeight,
-    0.1,
-    1000
+    0.1,  // Near plane at 10cm
+    1000  // Far plane at 1km for distant buildings
   );
-  camera.position.set(0, 20, 30);
+  
+  // Position camera at human eye level (1.7m) and 30m back from scene center
+  camera.position.set(0, 1.7, 30);
 
   // Setup renderer
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -41,7 +43,13 @@ export const initThreeScene = (
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; // adds smooth damping effect
   controls.dampingFactor = 0.05;
+  
+  // Set controls target to look slightly upward at buildings
   controls.target.set(0, 10, 0);
+  
+  // Set minimum distance to prevent going inside objects
+  controls.minDistance = 1.0; // 1 meter minimum distance
+  controls.maxDistance = 150; // 150 meters maximum distance
 
   // Select configuration based on quality setting
   const getConfigByQuality = () => {
