@@ -121,7 +121,7 @@ export const initThreeScene = (
 
       // Create loading screen
       const loadingScreen = createLoadingScreen(container, {
-        title: "Loading Cyberpunk City",
+        title: "Loading Cyber City",
         subtitle: "Preparing your immersive urban experience...",
         accentColor: "#00aaff",
         showAssetDetails: true,
