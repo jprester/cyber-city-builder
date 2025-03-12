@@ -5,14 +5,18 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { assetManager } from "./lib/three/managers/assetManager";
 import { createCityBuilder } from "./lib/three/builders/cityBuilder";
 import { createCityEnvironment } from "./lib/three/environment/cityEnvironment";
-import { cityConfig } from "./lib/three/config/cityConfig";
+import { cityConfig, performanceConfig, highQualityConfig } from "./lib/three/config/cityConfig";
 
 /**
  * Initialize Three.js scene with a cyberpunk city
  * @param container HTML container to render the scene in
+ * @param quality Optional quality setting ('high', 'low', or default)
  * @returns Cleanup function
  */
-export const initThreeScene = (container: HTMLDivElement) => {
+export const initThreeScene = (
+  container: HTMLDivElement, 
+  quality?: 'high' | 'low'
+) => {
   // Setup scene
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x111111);
@@ -39,9 +43,27 @@ export const initThreeScene = (container: HTMLDivElement) => {
   controls.dampingFactor = 0.05;
   controls.target.set(0, 10, 0);
 
-  // Create city builder and environment managers
+  // Select configuration based on quality setting
+  const getConfigByQuality = () => {
+    switch (quality) {
+      case 'high':
+        console.log('Using high quality configuration');
+        return highQualityConfig;
+      case 'low':
+        console.log('Using performance (low quality) configuration');
+        return performanceConfig;
+      default:
+        console.log('Using default quality configuration');
+        return cityConfig;
+    }
+  };
+  
+  // Get configuration
+  const config = getConfigByQuality();
+
+  // Create city builder and environment managers with configuration
   const cityBuilder = createCityBuilder(scene);
-  const environment = createCityEnvironment(scene);
+  const environment = createCityEnvironment(scene, config.environment);
   
   /**
    * Initialize the scene with buildings and environment
@@ -51,9 +73,9 @@ export const initThreeScene = (container: HTMLDivElement) => {
       console.log("Initializing city scene...");
       
       // Build the city with the buildings defined in the config
-      await cityBuilder.buildCity(cityConfig);
+      await cityBuilder.buildCity(config);
       
-      // Set up the environment (ground, roads, lights)
+      // Set up the environment (ground, roads, lights) using the config
       environment.initialize();
       
       console.log("City scene initialized successfully");
