@@ -24,50 +24,6 @@ export const cityConfig: CityConfig = {
       scale: [45, 45, 45], // Using the model's original scale (assuming it's already in meters)
       rotation: [0, 0, 0],
     },
-    {
-      modelPath:
-        "./src/assets/models/buildings/cyberpunk-building3/cyberpunk-building3.glb",
-      position: [-20, 0, 0], // 30 meters to the right (typical city block spacing)
-      scale: [1, 1, 1],
-      rotation: [0, 0, 0],
-      textures: [
-        // {
-        //   texturePath:
-        //     "./src/assets/models/buildings/cyberpunk-building3/textures/cyberpunk-building3-texture.png",
-        //   type: "map",
-        // },
-        // {
-        //   texturePath:
-        //     "./src/assets/models/buildings/cyberpunk-building3/textures/cyberpunk-building3-texture+emission.png",
-        //   type: "emissiveMap",
-        // },
-      ],
-    },
-    {
-      modelPath: "./src/assets/models/buildings/s01_01/s_01_01.obj",
-      position: [-50, 0, 50], // 30 meters to the right (typical city block spacing)
-      scale: [1, 1, 1],
-      rotation: [0, 0, 0],
-      textures: [
-        {
-          texturePath:
-            "./src/assets/models/buildings/s01_01/textures/building_01.jpg",
-          type: "map",
-        },
-      ],
-    },
-    // {
-    //   modelPath: "./src/assets/cyberpunk-apartment-building.glb",
-    //   position: [0, 0, 30], // 30 meters forward
-    //   scale: [1.1, 0.9, 1.1],
-    //   rotation: [0, Math.PI/6, 0]
-    // },
-    // {
-    //   modelPath: "./src/assets/cyberpunk-apartment-building2.glb",
-    //   position: [30, 0, 30], // Diagonal from center
-    //   scale: [0.9, 1.2, 0.9],
-    //   rotation: [0, -Math.PI/4, 0]
-    // },
   ],
 
   // Environment configurations
