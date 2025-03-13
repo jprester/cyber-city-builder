@@ -15,7 +15,7 @@ import { createPerformanceBenchmark } from "../utils/performanceBenchmark";
  * Performance test component to benchmark different configurations
  */
 export class PerformanceTest {
-  private renderer: THREE.WebGLRenderer;
+  private readonly renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
   private container: HTMLElement;
   public perfMonitor: PerformanceMonitor; // Make public so it can be accessed from outside
@@ -307,6 +307,11 @@ export class PerformanceTest {
 
     // Update performance monitor
     this.perfMonitor.update();
+    
+    // Log renderer info occasionally (to use the renderer property)
+    if (Math.random() < 0.001) {
+      console.debug("Renderer info:", this.renderer.info);
+    }
   }
 
   /**

@@ -1,9 +1,20 @@
+// Building texture configuration
+export interface BuildingTexture {
+  texturePath: string;
+  type: 'map' | 'normalMap' | 'roughnessMap' | 'metalnessMap' | 'emissiveMap' | 'aoMap';
+  repeat?: [number, number];
+  offset?: [number, number];
+  rotation?: number;
+  intensity?: number; // For emissive maps
+}
+
 // Building placement configuration
 export interface BuildingPlacement {
   modelPath: string;
   position: [number, number, number];
   scale: [number, number, number];
   rotation: [number, number, number];
+  textures?: BuildingTexture[];
 }
 
 // Light position configuration
