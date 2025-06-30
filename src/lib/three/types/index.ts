@@ -1,7 +1,13 @@
 // Building texture configuration
 export interface BuildingTexture {
   texturePath: string;
-  type: 'map' | 'normalMap' | 'roughnessMap' | 'metalnessMap' | 'emissiveMap' | 'aoMap';
+  type:
+    | "map"
+    | "normalMap"
+    | "roughnessMap"
+    | "metalnessMap"
+    | "emissiveMap"
+    | "aoMap";
   repeat?: [number, number];
   offset?: [number, number];
   rotation?: number;
@@ -79,8 +85,18 @@ export interface EnvironmentConfig {
   lighting: LightingConfig;
 }
 
+// Texture optimization configuration
+export interface TextureOptimizationConfig {
+  enabled: boolean;
+  maxTextureUnits: number;
+  priorityTextures: string[];
+  optionalTextures: string[];
+  disableTexturesWhenOverLimit: boolean;
+}
+
 // City configuration
 export interface CityConfig {
   buildings: BuildingPlacement[];
   environment: EnvironmentConfig;
+  textureOptimization?: TextureOptimizationConfig;
 }

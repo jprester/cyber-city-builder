@@ -15,7 +15,7 @@ export class CityEnvironment {
     this.config = config || {
       ground: {
         enabled: true,
-        size: 200,           // 200x200 meter ground plane (typical for a few city blocks)
+        size: 200, // 200x200 meter ground plane (typical for a few city blocks)
         color: 0x222222,
         roughness: 0.8,
         includeRoads: true,
@@ -24,7 +24,7 @@ export class CityEnvironment {
       streetLights: {
         enabled: true,
         intensity: 1,
-        distance: 15,        // 15 meter light radius (typical street light coverage)
+        distance: 15, // 15 meter light radius (typical street light coverage)
         color: 0xffffcc,
         shadowResolution: 512,
         positions: [],
@@ -32,14 +32,14 @@ export class CityEnvironment {
       lighting: {
         ambient: {
           enabled: true,
-          color: 0x444444,
-          intensity: 0.5,
+          color: 0xffffff,
+          intensity: 1,
         },
         directional: {
           enabled: true,
           color: 0xffffff,
           intensity: 0.8,
-          position: [100, 80, 100],  // Sun-like position (80m high)
+          position: [100, 80, 100], // Sun-like position (80m high)
           shadowEnabled: true,
           shadowResolution: 2048,
         },
@@ -47,12 +47,12 @@ export class CityEnvironment {
           enabled: true,
           color: 0x8888ff,
           intensity: 0.3,
-          position: [-70, 60, -70],  // Fill light from opposite direction
+          position: [-70, 60, -70], // Fill light from opposite direction
         },
         fog: {
           enabled: true,
           color: 0x090909,
-          density: 0.003,    // Adjusted for human scale (~300m visibility)
+          density: 0.003, // Adjusted for human scale (~300m visibility)
         },
       },
     };
@@ -105,14 +105,20 @@ export class CityEnvironment {
     // Add roads between buildings (horizontal)
     // Standard two-lane road is 10 meters wide (using human scale)
     const roadWidth = 10;
-    const mainRoadGeometry = new THREE.PlaneGeometry(config.size * 0.9, roadWidth);
+    const mainRoadGeometry = new THREE.PlaneGeometry(
+      config.size * 0.9,
+      roadWidth
+    );
     const mainRoad = new THREE.Mesh(mainRoadGeometry, roadMaterial);
     mainRoad.rotation.x = -Math.PI / 2;
     mainRoad.position.y = 0.01; // Slightly above ground to prevent z-fighting
     this.scene.add(mainRoad);
 
     // Add roads between buildings (vertical)
-    const crossRoadGeometry = new THREE.PlaneGeometry(roadWidth, config.size * 0.9);
+    const crossRoadGeometry = new THREE.PlaneGeometry(
+      roadWidth,
+      config.size * 0.9
+    );
     const crossRoad = new THREE.Mesh(crossRoadGeometry, roadMaterial);
     crossRoad.rotation.x = -Math.PI / 2;
     crossRoad.position.y = 0.01;
@@ -143,7 +149,7 @@ export class CityEnvironment {
     const poleGeometry = new THREE.CylinderGeometry(0.15, 0.2, poleHeight, 8);
     const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
     const pole = new THREE.Mesh(poleGeometry, poleMaterial);
-    pole.position.set(x, poleHeight/2, z); // Position bottom at ground level
+    pole.position.set(x, poleHeight / 2, z); // Position bottom at ground level
     pole.castShadow = true;
 
     // Light bulb - larger for better visibility
@@ -213,30 +219,30 @@ export class CityEnvironment {
    * Returns default positions for street lights
    */
   private getDefaultLightPositions(): LightPosition[] {
-    // Street lights positioned along roads at human scale 
+    // Street lights positioned along roads at human scale
     // spacing (~25 meters between poles)
     return [
       // Horizontal roads
-      { x: -25, z: -5, rotation: 0 },  // Left edge
-      { x: -10, z: -5, rotation: 0 },  // Left of center
-      { x: 10, z: -5, rotation: 0 },   // Right of center
-      { x: 25, z: -5, rotation: 0 },   // Right edge
-      
-      { x: -25, z: 5, rotation: 0 },   // Left edge (upper road)
-      { x: -10, z: 5, rotation: 0 },   // Left of center (upper road)
-      { x: 10, z: 5, rotation: 0 },    // Right of center (upper road)
-      { x: 25, z: 5, rotation: 0 },    // Right edge (upper road)
-      
+      { x: -25, z: -5, rotation: 0 }, // Left edge
+      { x: -10, z: -5, rotation: 0 }, // Left of center
+      { x: 10, z: -5, rotation: 0 }, // Right of center
+      { x: 25, z: -5, rotation: 0 }, // Right edge
+
+      { x: -25, z: 5, rotation: 0 }, // Left edge (upper road)
+      { x: -10, z: 5, rotation: 0 }, // Left of center (upper road)
+      { x: 10, z: 5, rotation: 0 }, // Right of center (upper road)
+      { x: 25, z: 5, rotation: 0 }, // Right edge (upper road)
+
       // Vertical roads
-      { x: -5, z: -25, rotation: Math.PI/2 },  // Bottom edge
-      { x: -5, z: -10, rotation: Math.PI/2 },  // Below center
-      { x: -5, z: 10, rotation: Math.PI/2 },   // Above center
-      { x: -5, z: 25, rotation: Math.PI/2 },   // Top edge
-      
-      { x: 5, z: -25, rotation: Math.PI/2 },   // Bottom edge (right road)
-      { x: 5, z: -10, rotation: Math.PI/2 },   // Below center (right road)
-      { x: 5, z: 10, rotation: Math.PI/2 },    // Above center (right road)
-      { x: 5, z: 25, rotation: Math.PI/2 },    // Top edge (right road)
+      { x: -5, z: -25, rotation: Math.PI / 2 }, // Bottom edge
+      { x: -5, z: -10, rotation: Math.PI / 2 }, // Below center
+      { x: -5, z: 10, rotation: Math.PI / 2 }, // Above center
+      { x: -5, z: 25, rotation: Math.PI / 2 }, // Top edge
+
+      { x: 5, z: -25, rotation: Math.PI / 2 }, // Bottom edge (right road)
+      { x: 5, z: -10, rotation: Math.PI / 2 }, // Below center (right road)
+      { x: 5, z: 10, rotation: Math.PI / 2 }, // Above center (right road)
+      { x: 5, z: 25, rotation: Math.PI / 2 }, // Top edge (right road)
     ];
   }
 
@@ -254,6 +260,7 @@ export class CityEnvironment {
         config.ambient.color,
         config.ambient.intensity
       );
+
       this.scene.add(ambientLight);
       result.ambientLight = ambientLight;
     }

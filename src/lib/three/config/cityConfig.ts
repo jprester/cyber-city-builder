@@ -17,13 +17,34 @@ import type { CityConfig } from "../types";
 export const cityConfig: CityConfig = {
   // Building configurations
   buildings: [
+    // {
+    //   modelPath:
+    //     "./src/assets/models/buildings/cyberpunk-apartment-building/cyberpunk-apartment-building.glb",
+    //   position: [20, 22, 14], // Center of the scene
+    //   scale: [45, 45, 45], // Using the model's original scale (assuming it's already in meters)
+    //   rotation: [0, 0, 0],
+    // },
     {
       modelPath:
-        "./src/assets/models/buildings/cyberpunk-apartment-building/cyberpunk-apartment-building.glb",
-      position: [20, 22, 14], // Center of the scene
-      scale: [45, 45, 45], // Using the model's original scale (assuming it's already in meters)
+        "./src/assets/models/buildings/high-rise-building/high-rise-building.glb",
+      position: [10, 1, 15], // Center of the scene
+      scale: [1, 1, 1], // Using the model's original scale (assuming it's already in meters)
       rotation: [0, 0, 0],
     },
+    {
+      modelPath:
+        "./src/assets/models/buildings/blue-skyscraper-building/blue-skyscrapper-building.glb",
+      position: [30, 0, 14], // Center of the scene
+      scale: [1, 1, 1], // Using the model's original scale (assuming it's already in meters)
+      rotation: [0, 0, 0],
+    },
+    // {
+    //   modelPath:
+    //     "./src/assets/models/buildings/brutalist-building2/brutalist_building_2.gltf",
+    //   position: [30, 0, 40], // Center of the scene
+    //   scale: [0.5, 0.5, 0.5], // Using the model's original scale (assuming it's already in meters)
+    //   rotation: [0, 0, 0],
+    // },
   ],
 
   // Environment configurations
@@ -90,6 +111,14 @@ export const cityConfig: CityConfig = {
       },
     },
   },
+  // Texture optimization settings for default mode
+  textureOptimization: {
+    enabled: true,
+    maxTextureUnits: 16,
+    priorityTextures: ["map", "normalMap", "emissiveMap"],
+    optionalTextures: ["roughnessMap", "metalnessMap", "aoMap"],
+    disableTexturesWhenOverLimit: true,
+  },
 };
 
 /**
@@ -114,6 +143,20 @@ export const performanceConfig: CityConfig = {
         enabled: false, // Disable fog for performance
       },
     },
+  },
+  // Texture optimization settings for performance mode
+  textureOptimization: {
+    enabled: true,
+    maxTextureUnits: 12, // Lower limit for performance
+    priorityTextures: ["map"], // Only keep essential diffuse texture
+    optionalTextures: [
+      "normalMap",
+      "emissiveMap",
+      "roughnessMap",
+      "metalnessMap",
+      "aoMap",
+    ],
+    disableTexturesWhenOverLimit: true,
   },
 };
 
@@ -140,5 +183,13 @@ export const highQualityConfig: CityConfig = {
       shadowResolution: 1024, // Higher resolution shadows
       intensity: 1.5, // Brighter lights
     },
+  },
+  // Texture optimization settings for high quality mode
+  textureOptimization: {
+    enabled: true,
+    maxTextureUnits: 16,
+    priorityTextures: ["map", "normalMap", "emissiveMap"], // Keep these textures
+    optionalTextures: ["roughnessMap", "metalnessMap", "aoMap"], // These can be removed if needed
+    disableTexturesWhenOverLimit: true,
   },
 };

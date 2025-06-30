@@ -43,7 +43,7 @@ export const initThreeScene = (
   // Setup renderer with appropriate pixel ratio for device
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
-    powerPreference: "high-performance", // Request high-performance GPU
+    powerPreference: "low-power", // Request high-performance GPU
   });
   // Use a maximum pixel ratio of 2 to prevent excessive rendering load on high-DPI devices
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -136,6 +136,9 @@ export const initThreeScene = (
 
       // Build the city with the buildings defined in the config (with preloading)
       await cityBuilder.buildCity(config, true);
+
+      // const light = new THREE.AmbientLight(0x404040, 1.2); // soft white light
+      // scene.add(light);
 
       // Set up the environment (ground, roads, lights) using the config
       environment.initialize();

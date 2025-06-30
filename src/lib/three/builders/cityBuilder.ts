@@ -34,6 +34,14 @@ export class CityBuilder {
     placedModel.scale.set(scale[0], scale[1], scale[2]);
     placedModel.rotation.set(rotation[0], rotation[1], rotation[2]);
 
+    // Enable shadows for all meshes
+    placedModel.traverse((node) => {
+      if (node instanceof THREE.Mesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+
     // Add to scene
     this.scene.add(placedModel);
 
@@ -41,12 +49,13 @@ export class CityBuilder {
   }
 
   /**
-   * Loads and places a 3D model in the scene with specified properties
-   * @param modelPath Path to the model file
-   * @param position Position [x, y, z]
-   * @param scale Scale [x, y, z]
+   * Loads a 3D model and places it in the scene
+   * @param modelPath Path to the 3D model file
+   * @param position Position in world coordinates [x, y, z]
+   * @param scale Scale factors [x, y, z]
    * @param rotation Rotation in radians [x, y, z]
    * @param textures Optional array of textures to apply to the model
+   * @param optimizationConfig Optional texture optimization configuration
    * @returns Promise resolving to the placed model or null if loading failed
    */
   async loadAndPlaceModel(
@@ -54,36 +63,112 @@ export class CityBuilder {
     position: [number, number, number] = [0, 0, 0],
     scale: [number, number, number] = [1, 1, 1],
     rotation: [number, number, number] = [0, 0, 0],
-    textures?: BuildingTexture[]
+    textures?: BuildingTexture[],
+    optimizationConfig?: any
   ): Promise<THREE.Object3D | null> {
     try {
+      // Load the model
       const model = await assetManager.loadModel(modelPath);
-
       if (!model) {
-        console.error(`Failed to place model ${modelPath} - loading failed`);
+        console.error(`Failed to load model: ${modelPath}`);
         return null;
       }
 
       // Apply textures if provided
       if (textures && textures.length > 0) {
-        await this.applyTexturesToModel(model, textures);
+        await this.applyTexturesToModel(model, textures, optimizationConfig);
       }
 
+      // Place the model in the scene
       return this.placeModel(model, position, scale, rotation);
     } catch (error) {
-      console.error(`Error placing model ${modelPath}:`, error);
+      console.error(`Error loading and placing model ${modelPath}:`, error);
       return null;
     }
   }
 
   /**
-   * Applies textures to a model
+   * Optimizes material texture usage to prevent exceeding MAX_TEXTURE_IMAGE_UNITS
+   * @param material The material to optimize
+   * @param textureCount Current texture count
+   * @param optimizationConfig Optional texture optimization configuration
+   * @returns Updated texture count after optimization
+   */
+  private optimizeMaterialTextures(
+    material: THREE.Material,
+    textureCount: number,
+    optimizationConfig?: any
+  ): number {
+    // If optimization is enabled and we're approaching the limit
+    if (
+      optimizationConfig?.enabled &&
+      textureCount >= optimizationConfig.maxTextureUnits - 2
+    ) {
+      const mat = material as any;
+
+      console.warn(
+        `Texture optimization triggered: ${textureCount} texture units used, limit is ${optimizationConfig.maxTextureUnits}`
+      );
+
+      // Remove optional textures first (in reverse order of importance)
+      const optionalTextures = optimizationConfig.optionalTextures || [
+        "aoMap",
+        "metalnessMap",
+        "roughnessMap",
+      ];
+
+      for (const textureType of optionalTextures) {
+        if (
+          mat[textureType] &&
+          textureCount >= optimizationConfig.maxTextureUnits - 1
+        ) {
+          console.warn(
+            `Removing ${textureType} from material to save texture units (${textureCount} -> ${
+              textureCount - 1
+            })`
+          );
+          mat[textureType] = null;
+          textureCount--;
+        }
+      }
+
+      // If still over limit, remove emissive map (unless it's in priority textures)
+      const priorityTextures = optimizationConfig.priorityTextures || [
+        "map",
+        "normalMap",
+      ];
+      if (
+        mat.emissiveMap &&
+        !priorityTextures.includes("emissiveMap") &&
+        textureCount >= optimizationConfig.maxTextureUnits
+      ) {
+        console.warn(
+          `Removing emissiveMap from material to save texture units (${textureCount} -> ${
+            textureCount - 1
+          })`
+        );
+        mat.emissiveMap = null;
+        textureCount--;
+      }
+
+      console.warn(
+        `Texture optimization complete: ${textureCount} texture units remaining`
+      );
+    }
+
+    return textureCount;
+  }
+
+  /**
+   * Applies textures to a model with optimization for texture unit limits
    * @param model The 3D model to apply textures to
    * @param textures Array of textures to apply
+   * @param optimizationConfig Optional texture optimization configuration
    */
   private async applyTexturesToModel(
     model: THREE.Object3D,
-    textures: BuildingTexture[]
+    textures: BuildingTexture[],
+    optimizationConfig?: any
   ): Promise<void> {
     console.debug(`Applying ${textures.length} textures to model`);
 
@@ -97,6 +182,7 @@ export class CityBuilder {
 
     // Count how many materials we applied textures to
     let materialCount = 0;
+    let totalTextureUnits = 0;
 
     // Apply textures to all meshes in the model
     model.traverse((node) => {
@@ -115,10 +201,20 @@ export class CityBuilder {
           loadedTextures.forEach(({ config, texture }) => {
             if (!texture) return;
 
+            // Check if we're approaching texture unit limits
+            const maxUnits = optimizationConfig?.maxTextureUnits || 16;
+            if (totalTextureUnits >= maxUnits) {
+              console.warn(
+                `Reached texture unit limit (${maxUnits}), skipping texture: ${config.type}`
+              );
+              return;
+            }
+
             console.debug(
-              `Applying texture ${config.type} to material ${material.type}`
+              `Applying texture ${config.type} to material ${
+                material.type
+              } (texture unit ${totalTextureUnits + 1}/${maxUnits})`
             );
-            // texture.flipY = false; // Ensure textures are not flipped vertically if model is in GLTF format
 
             // Set repeat, offset and rotation if specified
             if (config.repeat) {
@@ -143,6 +239,7 @@ export class CityBuilder {
                 if ("map" in material) {
                   material.map = texture;
                   material.needsUpdate = true;
+                  totalTextureUnits++;
                 }
                 break;
 
@@ -151,6 +248,7 @@ export class CityBuilder {
                 if ("normalMap" in material) {
                   material.normalMap = texture;
                   material.needsUpdate = true;
+                  totalTextureUnits++;
                 }
                 break;
 
@@ -159,6 +257,7 @@ export class CityBuilder {
                 if (material instanceof THREE.MeshStandardMaterial) {
                   material.roughnessMap = texture;
                   material.needsUpdate = true;
+                  totalTextureUnits++;
                 }
                 break;
 
@@ -167,6 +266,7 @@ export class CityBuilder {
                 if (material instanceof THREE.MeshStandardMaterial) {
                   material.metalnessMap = texture;
                   material.needsUpdate = true;
+                  totalTextureUnits++;
                 }
                 break;
 
@@ -183,6 +283,7 @@ export class CityBuilder {
                     material.emissiveIntensity = config.intensity;
                   }
                   material.needsUpdate = true;
+                  totalTextureUnits++;
                 }
                 break;
 
@@ -191,16 +292,24 @@ export class CityBuilder {
                 if ("aoMap" in material) {
                   material.aoMap = texture;
                   material.needsUpdate = true;
+                  totalTextureUnits++;
                 }
                 break;
             }
           });
+
+          // Optimize material if we're approaching texture unit limits
+          totalTextureUnits = this.optimizeMaterialTextures(
+            material,
+            totalTextureUnits,
+            optimizationConfig
+          );
         });
       }
     });
 
     console.debug(
-      `Applied textures to ${materialCount} materials in the model`
+      `Applied textures to ${materialCount} materials in the model (total texture units: ${totalTextureUnits})`
     );
   }
 
@@ -292,7 +401,8 @@ export class CityBuilder {
         building.position,
         building.scale,
         building.rotation,
-        building.textures
+        building.textures,
+        cityConfig.textureOptimization
       )
     );
 
